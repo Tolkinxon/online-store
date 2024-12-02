@@ -54,7 +54,7 @@ function render(arr, node) {
     node.append(fragment);
 }
 
- ;(async () => {
+async function getProducts() {
     const req = await fetch('http://localhost:5000/product',{
         method: "GET",  
         headers: {
@@ -64,7 +64,8 @@ function render(arr, node) {
     const res = await req.json();
     data = res
     render(res, elList);
-})();
+}
+getProducts()
 
 const showByCase = {
     ['filterBookmark']: function(){
@@ -129,7 +130,8 @@ async function deleteProduct(id) {
     });
     const res = await req.json();
     console.log(res);
-    
+    const idx = data.findIndex(item =>item.id == id)
+    data.splice(idx, 1)
     showByCase['admin']()
 }
 
@@ -158,8 +160,9 @@ async function editProduct (evt){
         body: formData
     });
     const res = await req.json();
+    getProducts()
+    showByCase['admin']()
     
-    console.log(res);
 }
 
 async function postProduct (evt){
