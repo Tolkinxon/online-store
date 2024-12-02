@@ -7,10 +7,17 @@
     <title>Document</title>
 </head>
 <body class="bg-gray-100">
+
     <div class="flex space-x-2 p-4 bg-gray-100 mb-[70px]">
+        <div class="js-nav-all ms-auto bg-gray-200 px-4 py-2 rounded shadow-md text-center cursor-pointer hover:bg-gray-300">
+            <span class="font-semibold">All</span>
+        </div>
         <!-- Side Nav -->
-        <div class="ms-auto bg-gray-200 px-4 py-2 rounded shadow-md text-center cursor-pointer hover:bg-gray-300">
+        <div class="js-nav-bookmark bg-gray-200 px-4 py-2 rounded shadow-md text-center cursor-pointer hover:bg-gray-300 relative">
             <span class="font-semibold">Bookmarked</span>
+            <div class="js-bookmark-badge badge absolute top-[-10px] right-[-5px] bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                5
+            </div>
         </div>
         <!-- Vertical Nav -->
         <div class="bg-gray-200 px-4 py-2 rounded shadow-md text-center cursor-pointer hover:bg-gray-300">
