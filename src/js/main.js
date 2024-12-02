@@ -7,7 +7,8 @@ const elNavAdmin = document.querySelector('.js-nav-admin');
 const elBookmarkBadge = document.querySelector('.js-bookmark-badge');
 const elAdminAddProducts = document.querySelector('.js-admin-add-products');
 const elProductAddEditForm = document.querySelector('.js-product-add-edit-form');
-const elProductAddEditBtn = document.querySelector('.js-product-add-edit-btn');
+const elProductAddBtn = document.querySelector('.js-product-add-btn');
+const elProductEditBtn = document.querySelector('.js-product-edit-btn');
 
 
 const token = localStorage.getItem('token');
@@ -134,6 +135,41 @@ async function postOrder(id){
     const res = await req.json();
 }
 
+async function editProduct (evt){
+    evt.preventDefault()
+    const formData = new FormData(elProductAddEditForm);
+
+    const req = await fetch(`http://localhost:5000/product/${evt.target.dataset.id}`,{
+        method:'PUT',
+        headers:{
+            authorization: token
+        },
+        body: formData
+    });
+    const res = await req.json();
+    
+    console.log(res);
+}
+
+async function postProduct (evt){
+    evt.preventDefault()
+    const formData = new FormData(elProductAddEditForm);
+
+
+    const req = await fetch('http://localhost:5000/product',{
+        method:'POST',
+        headers:{
+            authorization: token
+        },
+        body: formData
+    });
+    const res = await req.json();
+    data.push(res);
+    render(data, elList)
+}
+
+
+
 elList.addEventListener('click', (evt)=>{
     function findId (evt) {
         if(!evt.matches('.js-item')) return findId(evt.parentElement)
@@ -150,7 +186,7 @@ elList.addEventListener('click', (evt)=>{
     }
 
     let orderId = 0;
-    if(currentPage == 'order' || currentPage == 'admin') {
+    if(currentPage == 'order') {
         orderId = findOrderId(evt.target)
     }
 
@@ -159,6 +195,7 @@ elList.addEventListener('click', (evt)=>{
     const buyBtn = evt.target.matches('.js-buy-btn');
     const orderDeleteBtn = evt.target.matches('.js-order-delete-btn');
     const adminDeleteBtn = evt.target.matches('.js-admin-delete-btn');
+    const adminEditBtn = evt.target.matches('.js-admin-edit-btn');
 
     if(!(bookmarked.includes(id)) && bookmarkBtn){
         bookmarked.push(id); 
@@ -187,9 +224,19 @@ elList.addEventListener('click', (evt)=>{
         deleteOrder(orderId)
     }
     if(adminDeleteBtn && currentPage == 'admin'){
-        const index = data.findIndex(item => item.id == id)
         deleteProduct(id)
-        data.splice(index, 1)
+    }
+    if(adminEditBtn && currentPage == 'admin'){
+        document.querySelector('.modal').classList.toggle('hidden')
+        elProductAddBtn.style.display = 'none'
+        elProductEditBtn.style.display = 'block'
+        elProductEditBtn.dataset.id = id;
+
+        const product = data.find(item => item.id == id)
+
+        elProductAddEditForm[1].value = product.product_name
+        elProductAddEditForm[2].value = product.product_desc
+        elProductAddEditForm[3].value = product.product_price
     }
 })
 
@@ -201,6 +248,8 @@ elNavOrder.addEventListener('click', showByCase['order'])
 elNavAdmin.addEventListener('click', showByCase['admin'])
 elAdminAddProducts.addEventListener('click', ()=>{
     document.querySelector('.modal').classList.toggle('hidden')
+    elProductEditBtn.style.display = 'none'
+    elProductAddBtn.style.display = 'block'
 })
 document.querySelector('.modal').addEventListener('click', (evt)=>{
     if(evt.target.matches('.modal-close')){
@@ -209,19 +258,5 @@ document.querySelector('.modal').addEventListener('click', (evt)=>{
 })
 
 
-elProductAddEditBtn.addEventListener('click', async (evt)=>{
-    evt.preventDefault()
-    const formData = new FormData(elProductAddEditForm);
-
-
-    const req = await fetch('http://localhost:5000/product',{
-        method:'POST',
-        headers:{
-            authorization: token
-        },
-        body: formData
-    });
-    const res = await req.json();
-    data.push(res);
-    render(data, elList)
-})
+elProductAddBtn.addEventListener('click', postProduct)
+elProductEditBtn.addEventListener('click', editProduct)
