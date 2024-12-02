@@ -9,6 +9,7 @@ const elAdminAddProducts = document.querySelector('.js-admin-add-products');
 const elProductAddEditForm = document.querySelector('.js-product-add-edit-form');
 const elProductAddBtn = document.querySelector('.js-product-add-btn');
 const elProductEditBtn = document.querySelector('.js-product-edit-btn');
+const elPrices = document.querySelector('.prices');
 
 
 const token = localStorage.getItem('token');
@@ -69,16 +70,19 @@ const showByCase = {
     ['filterBookmark']: function(){
         const filteredBookmarkList = data.filter(item => bookmarked.some(itemSome => itemSome == item.id))
         currentPage = 'filterBookmark';
+        elPrices.classList.add('hidden');
         elAdminAddProducts.style.display = 'none'
         render(filteredBookmarkList, elList);
     },
     ['all']: function(){
         currentPage = 'all';
+        elPrices.classList.add('hidden');
         elAdminAddProducts.style.display = 'none'
         render(data, elList);
     },
     ['order']: function(){
         currentPage = 'order';
+        elPrices.classList.remove('hidden');
         elAdminAddProducts.style.display = 'none'
         async function getOrder(){
             const req = await fetch('http://localhost:5000/order',{
@@ -89,11 +93,15 @@ const showByCase = {
             });
             const res = await req.json();
             const editedData = res.map(item => {return {...data.find(itemData => itemData.id == item.product_id), order_id: item.order_id}})
+            elPrices.querySelector('.sum').textContent = editedData.reduce((acc, a) => {
+              return  acc += Number(a.product_price);
+            }, 0)
             render(editedData, elList);
         }
         getOrder();
     },
     ['admin']: function(){
+        elPrices.classList.add('hidden');
         elAdminAddProducts.style.display = 'flex'
         currentPage = 'admin';
         render(data, elList);
@@ -120,6 +128,8 @@ async function deleteProduct(id) {
         }
     });
     const res = await req.json();
+    console.log(res);
+    
     showByCase['admin']()
 }
 
@@ -133,6 +143,7 @@ async function postOrder(id){
         body: JSON.stringify({product_id: id})
     });
     const res = await req.json();
+    
 }
 
 async function editProduct (evt){
@@ -220,6 +231,10 @@ elList.addEventListener('click', (evt)=>{
     if(buyBtn){
         postOrder(id)
     }
+    if(buyBtn && currentPage == 'order'){
+        postOrder(id)
+        showByCase['order']()
+    }
     if(orderDeleteBtn && currentPage == 'order'){
         deleteOrder(orderId)
     }
@@ -250,6 +265,10 @@ elAdminAddProducts.addEventListener('click', ()=>{
     document.querySelector('.modal').classList.toggle('hidden')
     elProductEditBtn.style.display = 'none'
     elProductAddBtn.style.display = 'block'
+
+    elProductAddEditForm[1].value = ''
+    elProductAddEditForm[2].value = ''
+    elProductAddEditForm[3].value = ''
 })
 document.querySelector('.modal').addEventListener('click', (evt)=>{
     if(evt.target.matches('.modal-close')){
